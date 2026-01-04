@@ -31,7 +31,9 @@ CREATE TABLE group_members (
   id SERIAL PRIMARY KEY,
   group_id INTEGER REFERENCES groups(id),
   user_id INTEGER REFERENCES users(id),
-  role TEXT DEFAULT 'member'
+  role TEXT DEFAULT 'member',
+  preferences TEXT,
+  joined_at TIMESTAMP DEFAULT now()
 );
 
 CREATE TABLE claims (

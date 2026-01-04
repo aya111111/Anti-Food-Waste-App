@@ -2,23 +2,37 @@ import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { pool } from "../db";
+import { authMiddleware } from "../middleware/auth";
+
 
 const router = Router();
 
 // register
-router.post("/register", async (req, res) => {
+router.post("/register",  async (req, res) => {
   const { name, email, password } = req.body;
-  const hashed = await bcrypt.hash(password, 10);
+  if (!name || !email || !password || name.trim() === "" || password.trim() === "") {
+    return res.status(400).json({ 
+      error: "All fields are required." 
+    });
+  }
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    const result = await pool.query(
+      "INSERT INTO users (name,email,password_hash) VALUES ($1,$2,$3) RETURNING id,name,email",
+      [name, email, hashed]
+    );
+    const user = result.rows[0];
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || "dev");
+    res.status(201).json({ user, token });
+  } catch (error: any) {
+  
+    if (error.code === '23505') {
+      return res.status(400).json({ error: "This email address is already used." });
+    }
 
-  const result = await pool.query(
-    "INSERT INTO users (name,email,password_hash) VALUES ($1,$2,$3) RETURNING id,name,email",
-    [name, email, hashed]
-  );
-
-  const user = result.rows[0];
-  const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || "dev");
-
-  res.status(201).json({ user, token });
+    console.error(error);
+    res.status(500).json({ error: "Error creating account." });
+  }
 });
 
 // login

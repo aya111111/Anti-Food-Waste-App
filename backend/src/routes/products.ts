@@ -22,6 +22,12 @@ router.get("/", async (req, res: Response) => {
 router.post("/", authMiddleware, async (req: AuthRequest, res: Response) => {
   const owner_id = req.user!.id;
   const { name, category, expiry_date, is_shareable } = req.body;
+  
+  // Validate product name
+  if (!name || name.trim() === "") {
+    return res.status(400).json({ error: "Product name is required" });
+  }
+  
   try {
     const result = await pool.query(
       `INSERT INTO products (owner_id, name, category, quantity, expiry_date, is_shareable)
@@ -77,15 +83,14 @@ router.put("/:id", authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 });
 
+// Delete a product
 router.delete("/:id", authMiddleware, async (req: AuthRequest, res: Response) => {
   const productId = req.params.id;
   const userId = req.user!.id;
 
   try {
-    // 1. On supprime d'abord les claims associés
     await pool.query("DELETE FROM claims WHERE product_id = $1", [productId]);
 
-    // 2. On supprime ensuite le produit si l'utilisateur en est bien le propriétaire
     const result = await pool.query(
       "DELETE FROM products WHERE id = $1 AND owner_id = $2",
       [productId, userId]

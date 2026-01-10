@@ -30,7 +30,7 @@ export default function App() {
         <nav className="flex gap-6 mb-8 items-center border-b pb-4">
           <div className="flex gap-4">
             <Link to="/" className="text-gray-600 hover:text-black">My fridge</Link>
-            <Link to="/groups" className="text-gray-600 hover:text-black">Groups</Link>
+            {token && <Link to="/groups" className="text-gray-600 hover:text-black">Groups</Link>}
             {token && <Link to="/notifications" className="text-gray-600 hover:text-black">Notifications</Link>}
             {token && <Link to="/requests" className="text-gray-600 hover:text-black">Requests</Link>}
           </div>

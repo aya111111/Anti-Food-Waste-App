@@ -106,7 +106,7 @@ export default function Home() {
     await api.delete(`/products/${productId}`);
     setProducts(prev => prev.filter(p => p.id !== productId));
   } catch (err) {
-    console.error("Erreur suppression:", err);
+    console.error("Delete error:", err);
     alert("Delete failed.");
   }
 }
@@ -140,7 +140,6 @@ export default function Home() {
             <label className="text-xs font-bold text-gray-400 uppercase mb-1">Product Name</label>
             <input
               type="text"
-              placeholder="e.g. Milk"
               className="border border-gray-300 p-2.5 rounded-xl outline-none focus:border-blue-500"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
